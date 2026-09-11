@@ -2,15 +2,15 @@ import 'package:chinese_study/models/word_stats.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('error rate is 0 with no attempts', () {
+  test('accuracy is 0 with no attempts', () {
     final stats = WordStats();
-    expect(stats.mcErrorRate, 0.0);
-    expect(stats.tqErrorRate, 0.0);
+    expect(stats.mcAccuracy, 0.0);
+    expect(stats.tqAccuracy, 0.0);
   });
 
-  test('mc error rate reflects wrong/total', () {
+  test('mc accuracy reflects correct/total', () {
     final stats = WordStats(mcCorrect: 3, mcTotal: 4);
-    expect(stats.mcErrorRate, closeTo(0.25, 1e-9));
+    expect(stats.mcAccuracy, closeTo(0.75, 1e-9));
   });
 
   test('round trips through json', () {

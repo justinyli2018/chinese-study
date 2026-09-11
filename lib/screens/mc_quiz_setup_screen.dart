@@ -24,7 +24,7 @@ class _McQuizSetupScreenState extends State<McQuizSetupScreen> {
 
   bool _shuffleOrder = true;
   bool _filterEnabled = false;
-  double _maxErrorRatePercent = 50;
+  double _minAccuracyPercent = 80;
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _McQuizSetupScreenState extends State<McQuizSetupScreen> {
     return widget.wordSet.words.where((w) {
       final stat = _stats[w.statKey];
       if (stat == null || stat.mcTotal == 0) return true;
-      return stat.mcErrorRate * 100 < _maxErrorRatePercent;
+      return stat.mcAccuracy * 100 < _minAccuracyPercent;
     }).toList();
   }
 
@@ -102,9 +102,9 @@ class _McQuizSetupScreenState extends State<McQuizSetupScreen> {
             const Divider(),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Filter by error rate'),
+              title: const Text('Practice weak words only'),
               subtitle: const Text(
-                'Only include words you get wrong less than X% of the time',
+                'Only include words with a correct rate below X%',
               ),
               value: _filterEnabled,
               onChanged: (v) => setState(() => _filterEnabled = v),
@@ -114,18 +114,18 @@ class _McQuizSetupScreenState extends State<McQuizSetupScreen> {
                 children: [
                   Expanded(
                     child: Slider(
-                      value: _maxErrorRatePercent,
+                      value: _minAccuracyPercent,
                       min: 0,
                       max: 100,
                       divisions: 100,
-                      label: '${_maxErrorRatePercent.round()}%',
+                      label: '${_minAccuracyPercent.round()}%',
                       onChanged: (v) =>
-                          setState(() => _maxErrorRatePercent = v),
+                          setState(() => _minAccuracyPercent = v),
                     ),
                   ),
                   SizedBox(
                     width: 48,
-                    child: Text('${_maxErrorRatePercent.round()}%'),
+                    child: Text('${_minAccuracyPercent.round()}%'),
                   ),
                 ],
               ),

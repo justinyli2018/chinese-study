@@ -13,13 +13,13 @@ class WordStats {
     this.tqTotal = 0,
   });
 
-  /// Fraction of multiple-choice attempts answered incorrectly, in [0, 1].
-  /// Words with no attempts yet report 0 (treated as "not yet known to be
-  /// wrong", so filters include them by default).
-  double get mcErrorRate => mcTotal == 0 ? 0.0 : 1 - (mcCorrect / mcTotal);
+  /// Fraction of multiple-choice attempts answered correctly, in [0, 1].
+  /// Words with no attempts yet report 0, so a "practice words below X%"
+  /// filter includes never-seen words by default.
+  double get mcAccuracy => mcTotal == 0 ? 0.0 : mcCorrect / mcTotal;
 
-  /// Fraction of typing-quiz attempts answered incorrectly, in [0, 1].
-  double get tqErrorRate => tqTotal == 0 ? 0.0 : 1 - (tqCorrect / tqTotal);
+  /// Fraction of typing-quiz attempts answered correctly, in [0, 1].
+  double get tqAccuracy => tqTotal == 0 ? 0.0 : tqCorrect / tqTotal;
 
   Map<String, dynamic> toJson() => {
         'mc': mcCorrect,

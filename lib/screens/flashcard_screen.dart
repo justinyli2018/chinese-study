@@ -52,6 +52,24 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
     });
   }
 
+  void _handleVerticalSwipe(DragEndDetails details) {
+    const threshold = 200.0;
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity.abs() >= threshold) {
+      setState(() => _showDefinition = !_showDefinition);
+    }
+  }
+
+  void _handleHorizontalSwipe(DragEndDetails details) {
+    const threshold = 200.0;
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity <= -threshold) {
+      _next();
+    } else if (velocity >= threshold) {
+      _previous();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final words = widget.wordSet.words;
@@ -76,64 +94,75 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Text(
-                '${_position + 1} / ${words.length}',
-                style: Theme.of(context).textTheme.bodyMedium,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onVerticalDragEnd: _handleVerticalSwipe,
+          onHorizontalDragEnd: _handleHorizontalSwipe,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  '${_position + 1} / ${words.length}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
-            ),
-            Expanded(
-              child: Center(
-                child: GestureDetector(
-                  onTap: () => setState(() => _showDefinition = !_showDefinition),
-                  child: Card(
-                    elevation: 4,
-                    margin: const EdgeInsets.all(24),
-                    child: Container(
-                      width: double.infinity,
-                      constraints: const BoxConstraints(minHeight: 240),
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(24),
-                      child: Text(
-                        _showDefinition ? word.definition : word.hanzi,
-                        textAlign: TextAlign.center,
-                        style: _showDefinition
-                            ? Theme.of(context).textTheme.headlineSmall
-                            : Theme.of(
-                                context,
-                              ).textTheme.displayMedium?.copyWith(fontSize: 64),
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () =>
+                        setState(() => _showDefinition = !_showDefinition),
+                    child: Card(
+                      elevation: 4,
+                      margin: const EdgeInsets.all(24),
+                      child: Container(
+                        width: double.infinity,
+                        constraints: const BoxConstraints(minHeight: 240),
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          _showDefinition ? word.definition : word.hanzi,
+                          textAlign: TextAlign.center,
+                          style: _showDefinition
+                              ? Theme.of(context).textTheme.headlineSmall
+                              : Theme.of(context).textTheme.displayMedium
+                                    ?.copyWith(fontSize: 64),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 8),
-              child: Text('Tap the card to flip'),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton.filledTonal(
-                    iconSize: 32,
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: _previous,
-                  ),
-                  IconButton.filledTonal(
-                    iconSize: 32,
-                    icon: const Icon(Icons.arrow_forward),
-                    onPressed: _next,
-                  ),
-                ],
+              const Padding(
+                padding: EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'Tap or swipe up/down to flip • swipe left/right to move',
+                  textAlign: TextAlign.center,
+                ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton.filledTonal(
+                      iconSize: 32,
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: _previous,
+                    ),
+                    IconButton.filledTonal(
+                      iconSize: 32,
+                      icon: const Icon(Icons.arrow_forward),
+                      onPressed: _next,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

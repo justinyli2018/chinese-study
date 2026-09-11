@@ -69,6 +69,16 @@ class _McQuizScreenState extends State<McQuizScreen> {
     );
   }
 
+  void _handleHorizontalSwipe(DragEndDetails details) {
+    const threshold = 200.0;
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity <= -threshold) {
+      if (_answered) _next();
+    } else if (velocity >= threshold) {
+      Navigator.of(context).maybePop();
+    }
+  }
+
   void _next() {
     if (_questionIndex + 1 >= widget.questions.length) {
       Navigator.of(context).pushReplacement(
@@ -108,53 +118,57 @@ class _McQuizScreenState extends State<McQuizScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Score: $_correctCount / ${_questionIndex + (_answered ? 1 : 0)}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 24),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    _currentQuestion.definition,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragEnd: _handleHorizontalSwipe,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Score: $_correctCount / ${_questionIndex + (_answered ? 1 : 0)}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 24),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      _currentQuestion.definition,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              ..._choices.map(
-                (choice) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _colorFor(choice),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      onPressed: () => _selectChoice(choice),
-                      child: Text(
-                        choice.hanzi,
-                        style: const TextStyle(fontSize: 22),
+                const SizedBox(height: 24),
+                ..._choices.map(
+                  (choice) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _colorFor(choice),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        onPressed: () => _selectChoice(choice),
+                        child: Text(
+                          choice.hanzi,
+                          style: const TextStyle(fontSize: 22),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              if (_answered)
-                FilledButton(
-                  onPressed: _next,
-                  child: Text(isLast ? 'Finish' : 'Next'),
-                ),
-            ],
+                const SizedBox(height: 12),
+                if (_answered)
+                  FilledButton(
+                    onPressed: _next,
+                    child: Text(isLast ? 'Finish' : 'Next'),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
