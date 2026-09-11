@@ -16,8 +16,13 @@ class FlashcardScreen extends StatefulWidget {
 class _FlashcardScreenState extends State<FlashcardScreen> {
   late List<int> _order;
   int _position = 0;
-  bool _showDefinition = false;
+  bool _flipped = false;
   bool _shuffled = false;
+  bool _definitionFirst = false;
+
+  /// Whether the card's face currently shows the definition, accounting for
+  /// both the per-card flip state and the "show definition first" setting.
+  bool get _isShowingDefinition => _definitionFirst ? !_flipped : _flipped;
 
   @override
   void initState() {
@@ -34,21 +39,28 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
         _order = List.generate(widget.wordSet.words.length, (i) => i);
       }
       _position = 0;
-      _showDefinition = false;
+      _flipped = false;
+    });
+  }
+
+  void _toggleDefinitionFirst() {
+    setState(() {
+      _definitionFirst = !_definitionFirst;
+      _flipped = false;
     });
   }
 
   void _next() {
     setState(() {
       _position = (_position + 1) % _order.length;
-      _showDefinition = false;
+      _flipped = false;
     });
   }
 
   void _previous() {
     setState(() {
       _position = (_position - 1 + _order.length) % _order.length;
-      _showDefinition = false;
+      _flipped = false;
     });
   }
 
@@ -56,7 +68,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
     const threshold = 200.0;
     final velocity = details.primaryVelocity ?? 0;
     if (velocity.abs() >= threshold) {
-      setState(() => _showDefinition = !_showDefinition);
+      setState(() => _flipped = !_flipped);
     }
   }
 
@@ -91,6 +103,13 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
             icon: Icon(_shuffled ? Icons.shuffle_on_outlined : Icons.shuffle),
             onPressed: _toggleShuffle,
           ),
+          IconButton(
+            tooltip: _definitionFirst
+                ? 'Showing definition first (tap to show word first)'
+                : 'Showing word first (tap to show definition first)',
+            icon: Icon(_definitionFirst ? Icons.translate : Icons.text_fields),
+            onPressed: _toggleDefinitionFirst,
+          ),
         ],
       ),
       body: SafeArea(
@@ -110,8 +129,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
               Expanded(
                 child: Center(
                   child: GestureDetector(
-                    onTap: () =>
-                        setState(() => _showDefinition = !_showDefinition),
+                    onTap: () => setState(() => _flipped = !_flipped),
                     child: Card(
                       elevation: 4,
                       margin: const EdgeInsets.all(24),
@@ -121,9 +139,9 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                         alignment: Alignment.center,
                         padding: const EdgeInsets.all(24),
                         child: Text(
-                          _showDefinition ? word.definition : word.hanzi,
+                          _isShowingDefinition ? word.definition : word.hanzi,
                           textAlign: TextAlign.center,
-                          style: _showDefinition
+                          style: _isShowingDefinition
                               ? Theme.of(context).textTheme.headlineSmall
                               : Theme.of(context).textTheme.displayMedium
                                     ?.copyWith(fontSize: 64),

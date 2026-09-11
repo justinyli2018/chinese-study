@@ -118,56 +118,69 @@ class _McQuizScreenState extends State<McQuizScreen> {
         ),
       ),
       body: SafeArea(
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onHorizontalDragEnd: _handleHorizontalSwipe,
-          child: SingleChildScrollView(
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Score: $_correctCount / ${_questionIndex + (_answered ? 1 : 0)}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 24),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      _currentQuestion.definition,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ..._choices.map(
-                  (choice) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _colorFor(choice),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        onPressed: () => _selectChoice(choice),
-                        child: Text(
-                          choice.hanzi,
-                          style: const TextStyle(fontSize: 22),
+            child: ConstrainedBox(
+              // Guarantees the gesture-detecting column always spans at
+              // least the full screen height, so swipes work in any blank
+              // space below the content too - not just on top of it.
+              constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
+              child: IntrinsicHeight(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onHorizontalDragEnd: _handleHorizontalSwipe,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Score: $_correctCount / ${_questionIndex + (_answered ? 1 : 0)}',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 24),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            _currentQuestion.definition,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      ..._choices.map(
+                        (choice) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _colorFor(choice),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                              ),
+                              onPressed: () => _selectChoice(choice),
+                              child: Text(
+                                choice.hanzi,
+                                style: const TextStyle(fontSize: 22),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      const SizedBox(height: 12),
+                      if (_answered)
+                        FilledButton(
+                          onPressed: _next,
+                          child: Text(isLast ? 'Finish' : 'Next'),
+                        ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                if (_answered)
-                  FilledButton(
-                    onPressed: _next,
-                    child: Text(isLast ? 'Finish' : 'Next'),
-                  ),
-              ],
+              ),
             ),
           ),
         ),

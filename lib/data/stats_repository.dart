@@ -70,4 +70,32 @@ class StatsRepository {
     if (correct) stat.tqCorrect += 1;
     await _saveAll(all);
   }
+
+  /// Clears all accuracy stats (multiple-choice and typing) for every word
+  /// in [setId].
+  Future<void> clearSet(String setId) async {
+    final all = await _loadAll();
+    all.remove(setId);
+    await _saveAll(all);
+  }
+
+  /// Clears all accuracy stats for a single word.
+  Future<void> clearWord(String setId, String wordKey) async {
+    final all = await _loadAll();
+    all[setId]?.remove(wordKey);
+    await _saveAll(all);
+  }
+
+  /// Overwrites the stats for a single word - used to restore a value after
+  /// [clearWord] (undo).
+  Future<void> setWordStats(
+    String setId,
+    String wordKey,
+    WordStats stats,
+  ) async {
+    final all = await _loadAll();
+    final setStats = all.putIfAbsent(setId, () => {});
+    setStats[wordKey] = stats;
+    await _saveAll(all);
+  }
 }

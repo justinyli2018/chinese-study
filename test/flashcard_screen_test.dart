@@ -74,6 +74,30 @@ void main() {
     expect(find.text('你好'), findsOneWidget);
   });
 
+  testWidgets('definition-first toggle shows definition on the front', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(home: FlashcardScreen(wordSet: buildSet())),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('你好'), findsOneWidget);
+    expect(find.text('hello'), findsNothing);
+
+    await tester.tap(find.byIcon(Icons.text_fields));
+    await tester.pumpAndSettle();
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('你好'), findsNothing);
+    expect(tester.takeException(), isNull);
+
+    // Tapping the card should now flip back to the word.
+    await tester.tap(find.text('hello'));
+    await tester.pumpAndSettle();
+    expect(find.text('你好'), findsOneWidget);
+  });
+
   testWidgets('shuffle button still works', (tester) async {
     await tester.pumpWidget(
       MaterialApp(home: FlashcardScreen(wordSet: buildSet())),

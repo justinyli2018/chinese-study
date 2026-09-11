@@ -6,6 +6,7 @@ import '../models/word_set.dart';
 import 'flashcard_screen.dart';
 import 'mc_quiz_setup_screen.dart';
 import 'typing_quiz_setup_screen.dart';
+import 'word_stats_screen.dart';
 
 const _currentSetPrefKey = 'current_set_id';
 
@@ -143,6 +144,16 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => TypingQuizSetupScreen(wordSet: currentSet),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.bar_chart),
+            label: const Text('Word Stats'),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => WordStatsScreen(wordSet: currentSet),
               ),
             ),
           ),

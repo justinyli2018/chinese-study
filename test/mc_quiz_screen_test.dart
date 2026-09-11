@@ -46,6 +46,33 @@ void main() {
     expect(find.text('hello'), findsNothing);
   });
 
+  testWidgets(
+    'swipe works in the blank space below the Next button',
+    (tester) async {
+      final wordSet = buildSet();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: McQuizScreen(wordSet: wordSet, questions: wordSet.words),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('你好'));
+      await tester.pumpAndSettle();
+      expect(find.text('Next'), findsOneWidget);
+
+      // Start the fling near the very bottom of the screen, well below
+      // where the Next button sits, in what used to be dead space.
+      final screenSize = tester.view.physicalSize / tester.view.devicePixelRatio;
+      final bottomArea = Offset(screenSize.width / 2, screenSize.height - 5);
+      await tester.flingFrom(bottomArea, const Offset(-300, 0), 800);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('hello'), findsNothing);
+    },
+  );
+
   testWidgets('swipe-left before answering does nothing', (tester) async {
     final wordSet = buildSet();
     await tester.pumpWidget(

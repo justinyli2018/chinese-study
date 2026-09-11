@@ -99,96 +99,117 @@ class _TypingQuizScreenState extends State<TypingQuizScreen> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Swipe navigation lives on either side of the text field, not
-              // on top of it, so the field keeps its normal cursor/selection
-              // drag behavior.
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onHorizontalDragEnd: _handleHorizontalSwipe,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              // Guarantees the column always spans at least the full screen
+              // height, so the swipe zones below cover any blank space too -
+              // not just the area right around the content.
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 48,
+              ),
+              child: IntrinsicHeight(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Score: $_correctCount / ${_questionIndex + (_answered ? 1 : 0)}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 24),
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Text(
-                          _currentQuestion.definition,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
+                    // Swipe navigation lives on either side of the text
+                    // field, not on top of it, so the field keeps its normal
+                    // cursor/selection drag behavior.
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onHorizontalDragEnd: _handleHorizontalSwipe,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Score: $_correctCount / ${_questionIndex + (_answered ? 1 : 0)}',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 24),
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                _currentQuestion.definition,
+                                textAlign: TextAlign.center,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineSmall,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                autofocus: true,
-                enabled: !_answered,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 28),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Type the Chinese word',
-                ),
-                onSubmitted: (_) => _submit(),
-              ),
-              const SizedBox(height: 16),
-              GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onHorizontalDragEnd: _handleHorizontalSwipe,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_answered) ...[
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: _wasCorrect
-                              ? Colors.green.shade100
-                              : Colors.red.shade100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      enabled: !_answered,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 28),
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Type the Chinese word',
+                      ),
+                      onSubmitted: (_) => _submit(),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onHorizontalDragEnd: _handleHorizontalSwipe,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Text(
-                              _wasCorrect ? 'Correct!' : 'Not quite.',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            if (!_wasCorrect) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                'Correct answer: ${_currentQuestion.hanzi}',
-                                style: const TextStyle(fontSize: 22),
+                            if (_answered) ...[
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: _wasCorrect
+                                      ? Colors.green.shade100
+                                      : Colors.red.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      _wasCorrect ? 'Correct!' : 'Not quite.',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium,
+                                    ),
+                                    if (!_wasCorrect) ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Correct answer: ${_currentQuestion.hanzi}',
+                                        style: const TextStyle(fontSize: 22),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
+                              const SizedBox(height: 16),
                             ],
+                            const Spacer(),
+                            FilledButton(
+                              onPressed: _answered ? _next : _submit,
+                              child: Text(
+                                _answered
+                                    ? (isLast ? 'Finish' : 'Next')
+                                    : 'Submit',
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                    ],
-                    FilledButton(
-                      onPressed: _answered ? _next : _submit,
-                      child: Text(
-                        _answered ? (isLast ? 'Finish' : 'Next') : 'Submit',
-                      ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
